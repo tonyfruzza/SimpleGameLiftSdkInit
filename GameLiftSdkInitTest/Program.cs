@@ -17,7 +17,7 @@ namespace GameLiftSdkInitTest
                 return;
             }
             Console.WriteLine("SDK initialized sitting in game loop");
-
+            // Endless game loop
             while (true){}
         }
 
