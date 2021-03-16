@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Threading;
 using System.Collections.Generic;
 using Aws.GameLift.Server;
 using Aws.GameLift.Server.Model;
+using Amazon;
+using Amazon.Runtime;
+using Amazon.CloudWatch;
+using Amazon.CloudWatch.Model;
 
 
 namespace GameLiftSdkInitTest
@@ -27,6 +32,16 @@ namespace GameLiftSdkInitTest
     class AwsGameLogic
     {
         const int listening_port = 8080;
+        Random rand;
+
+        public AwsGameLogic()
+        {
+            rand = new Random();
+            Thread t = new Thread(new ThreadStart(PublishPlayerCountLoop));
+            t.Start();
+        }
+
+
         public bool InitGameLift()
         {
             var initSDKOutcome = GameLiftServerAPI.InitSDK();
@@ -79,6 +94,44 @@ namespace GameLiftSdkInitTest
         {
             Console.WriteLine("Received health check request.");
             return true;
+        }
+
+        // CloudWatch Metrics refernce guide
+        // https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/cloudwatch-getting-metrics-examples.html
+        void PublishPlayerCountLoop()
+        {
+            var credentials = new StoredProfileAWSCredentials("lab");
+            string ns = "dev-gameoftheyear";
+            int random_ccu = 0;
+            while (true)
+            {
+                random_ccu = rand.Next(8);
+                Console.WriteLine($"Publishing CCU count to CloudWatch Metrics within namespace '{ns}' setting value to {random_ccu}");
+                var dimension = new Dimension
+                {
+                    Name = "fleet_id",
+                    Value = "fleet-1234"
+                };
+
+                
+                using (var cw = new AmazonCloudWatchClient(credentials, RegionEndpoint.USWest2))
+                {
+                    // Docs on metric info
+                    // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html
+                    PutMetricDataResponse ret = cw.PutMetricData(new PutMetricDataRequest
+                    {
+                        MetricData = new List<MetricDatum>{new MetricDatum
+                        {
+                            MetricName = "CCU",
+                            Dimensions = new List<Dimension>{dimension},
+                            Unit = "Count",
+                            Value = random_ccu
+                        }},
+                        Namespace = ns
+                    });
+                }
+                Thread.Sleep(60 * 1000);
+            }
         }
     }
 }

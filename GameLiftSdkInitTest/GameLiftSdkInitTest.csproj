@@ -40,5 +40,14 @@
     <Reference Include="GameLiftServerSDKNet45">
       <HintPath>libs\GameLiftServerSDKNet45.dll</HintPath>
     </Reference>
+    <Reference Include="AWSSDK.Core">
+      <HintPath>libs\awssdk\AWSSDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.CloudWatch">
+      <HintPath>libs\awssdk\AWSSDK.CloudWatch.dll</HintPath>
+    </Reference>
+    <Reference Include="AWSSDK.CloudWatchLogs">
+      <HintPath>libs\awssdk\AWSSDK.CloudWatchLogs.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
